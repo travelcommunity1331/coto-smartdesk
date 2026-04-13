@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Database, Plus, RefreshCcw, Slash, Tag, Key, Loader2, CheckCircle2, Users, Phone, Mail, Building } from 'lucide-react';
+import { Database, Plus, RefreshCcw, Slash, Tag, Key, Loader2, CheckCircle2, Users, Phone, Mail, Building, Lock } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from "@/lib/supabase";
 
@@ -26,11 +26,34 @@ export default function SuperAdminPage() {
   const [profiles, setProfiles] = useState<any[]>([]);
   const [fetchingProfiles, setFetchingProfiles] = useState(true);
 
+  // Security Gate
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passcode, setPasscode] = useState('');
+  const [pinError, setPinError] = useState(false);
+
   // Fetch data when component mounts
   useEffect(() => {
-    fetchLicenses();
-    fetchProfiles();
+    // Check if previously unlocked
+    const savedPin = sessionStorage.getItem('boss_pin');
+    if (savedPin === '686868') {
+      setIsUnlocked(true);
+      fetchLicenses();
+      fetchProfiles();
+    }
   }, []);
+
+  const handleUnlock = () => {
+    if (passcode === '686868') {
+      sessionStorage.setItem('boss_pin', passcode);
+      setIsUnlocked(true);
+      setPinError(false);
+      fetchLicenses();
+      fetchProfiles();
+    } else {
+      setPinError(true);
+      setPasscode('');
+    }
+  };
 
   const fetchLicenses = async () => {
     setFetching(true);
@@ -117,6 +140,49 @@ export default function SuperAdminPage() {
     const d = new Date(dateString);
     return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(d);
   };
+
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 selection:bg-rose-500">
+        <div className="bg-[#111111] border border-rose-500/20 p-8 rounded-2xl shadow-[0_0_50px_rgba(225,29,72,0.1)] text-center max-w-sm w-full relative overflow-hidden">
+           <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/10 rounded-full blur-[50px] pointer-events-none"></div>
+           
+           <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-6 relative z-10 border border-rose-500/20">
+             <Lock size={28} className="text-rose-500" />
+           </div>
+           
+           <h2 className="text-xl font-bold text-white mb-2 tracking-widest uppercase relative z-10">Cổng An Ninh</h2>
+           <p className="text-zinc-500 text-xs mb-8 uppercase tracking-wider relative z-10">Chỉ dành cho Super Boss</p>
+           
+           <div className="relative z-10">
+             <input 
+               type="password" 
+               value={passcode}
+               onChange={e => {
+                 setPasscode(e.target.value);
+                 if (pinError) setPinError(false);
+               }}
+               onKeyDown={e => {
+                  if (e.key === 'Enter') handleUnlock();
+               }}
+               className={`w-full bg-[#1a1a1a] p-4 rounded-xl text-center text-rose-500 tracking-[0.5em] font-bold text-xl outline-none focus:ring-2 focus:ring-rose-500/50 transition mb-4 border ${pinError ? 'border-rose-500 animate-shake' : 'border-zinc-800'}`}
+               placeholder="••••••"
+               autoFocus
+             />
+             
+             {pinError && <p className="text-rose-500 text-xs mb-4">Mật mã không đúng. Sự xâm nhập đã bị ghi lại!</p>}
+             
+             <button 
+               onClick={handleUnlock}
+               className="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl uppercase tracking-widest transition shadow-[0_0_15px_rgba(225,29,72,0.3)]"
+             >
+               MỞ KHÓA VAULT
+             </button>
+           </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-slate-100 font-mono selection:bg-rose-500 selection:text-white pb-12">
