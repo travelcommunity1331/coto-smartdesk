@@ -442,9 +442,30 @@ export default function SuperAdminPage() {
                              </div>
                            </td>
                            <td className="p-4 align-top flex flex-col items-end gap-2">
-                             <span className="bg-amber-900/30 text-amber-500 border border-amber-500/20 px-3 py-1 rounded text-xs">Chưa Mua Key</span>
-                             <button className="text-xs underline text-zinc-500 hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition">Đánh dấu đã chốt &rarr;</button>
-                           </td>
+                              {hasActiveLicense(pf.id) ? (
+                                <span className="bg-emerald-900/30 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded text-xs flex items-center gap-1">
+                                  <CheckCircle2 size={12}/> Khách Xịn
+                                </span>
+                              ) : (
+                                <span className="bg-amber-900/30 text-amber-500 border border-amber-500/20 px-3 py-1 rounded text-xs">Chưa Mua Key</span>
+                              )}
+                              
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => alert("Sale đã được ghi nhận. Vui lòng di chuyển lên Máy Dập Key để cấp mã cho khách này!")}
+                                  className="text-xs underline text-zinc-400 hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition"
+                                >
+                                  Đã chốt &rarr;
+                                </button>
+                                <button 
+                                  onClick={() => handleDeleteProfile(pf.id)}
+                                  title="Xóa hồ sơ rác"
+                                  className="text-rose-500/50 hover:text-rose-400 hover:bg-rose-900/20 p-1.5 rounded transition opacity-0 group-hover:opacity-100"
+                                >
+                                  <Trash2 size={14} />
+                                </button>
+                              </div>
+                            </td>
                          </tr>
                        ))
                      )}
