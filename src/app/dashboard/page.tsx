@@ -7,6 +7,7 @@ import { PosMenu } from "@/components/PosMenu";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { BookingModal } from "@/components/BookingModal";
 import { SettingsModal } from "@/components/SettingsModal";
+import { HistoryModal } from "@/components/HistoryModal";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -23,6 +24,7 @@ export default function Home() {
   // Modal States
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); // Trigger reload for child components
 
   const triggerReload = () => setRefreshKey(prev => prev + 1);
@@ -147,12 +149,15 @@ export default function Home() {
           <a href="#" className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-md text-white font-medium hover:bg-white/20 transition">
             <LayoutDashboard size={20} /> Tổng Quan
           </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
+          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
             <CalendarDays size={20} /> Lưới Đặt Phòng
-          </a>
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
+          </button>
+          <button onClick={() => setIsSettingsOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
             <BedDouble size={20} /> Quản Lý Buồng
-          </a>
+          </button>
+          <button onClick={() => setIsHistoryOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
+            <ShieldCheck size={20} /> Nhật Ký Hoạt Động
+          </button>
         </nav>
         
         <div className="pt-4 border-t border-slate-700">
@@ -283,6 +288,11 @@ export default function Home() {
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
         onSuccess={triggerReload}
+      />
+      
+      <HistoryModal 
+        isOpen={isHistoryOpen} 
+        onClose={() => setIsHistoryOpen(false)} 
       />
 
       {/* BOTTOM TAB NAV MẶC ĐỊNH BỊ BLUR NẾU KHÓA KEY */}

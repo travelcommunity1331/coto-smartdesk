@@ -15,9 +15,14 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
   const [loading, setLoading] = useState(true);
   
   // Create Room State
-  const [newRoomName, setNewRoomName] = useState("");
-  const [newRoomType, setNewRoomType] = useState("Phòng Đơn");
+  const [newRoomType, setNewRoomType] = useState("");
   const [isAdding, setIsAdding] = useState(false);
+  
+  // Manage Room Types (Hạng Phòng Custom)
+  const defaultRoomTypes = ["Phòng Đơn", "Phòng Đôi", "Phòng Gia Đình", "Dorm (Tập thể)", "VIP"];
+  const [roomTypes, setRoomTypes] = useState<string[]>(defaultRoomTypes);
+  const [newCustomCat, setNewCustomCat] = useState("");
+  const [isUpdatingMetadata, setIsUpdatingMetadata] = useState(false);
 
   useEffect(() => {
     if (isOpen) fetchRooms();
@@ -28,6 +33,16 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
     setUser(user);
+
+    // Nạp hạng phòng từ settings cá nhân
+    const userCats = user.user_metadata?.room_types;
+    if (userCats && Array.isArray(userCats)) {
+      setRoomTypes(userCats);
+      if (userCats.length > 0) setNewRoomType(userCats[0]);
+    } else {
+      setRoomTypes(defaultRoomTypes);
+      setNewRoomType(defaultRoomTypes[0]);
+    }
 
     const { data } = await supabase
       .from('rooms')
@@ -86,6 +101,42 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
     }
   };
 
+  const handleAddCategory = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCustomCat || !user) return;
+    setIsUpdatingMetadata(true);
+    try {
+       const updatedCats = [...roomTypes, newCustomCat];
+       const { error } = await supabase.auth.updateUser({ data: { room_types: updatedCats } });
+       if (error) throw error;
+       
+       setRoomTypes(updatedCats);
+       setNewCustomCat("");
+       if (updatedCats.length === 1) setNewRoomType(updatedCats[0]);
+    } catch(err: any) {
+       alert("Lỗi thêm Hạng phòng: " + err.message);
+    } finally {
+       setIsUpdatingMetadata(false);
+    }
+  };
+
+  const handleDeleteCategory = async (cat: string) => {
+    if (!confirm(`Xóa hạng phòng: ${cat}? Các phòng cũ đang dùng hạng này vẫn giữ nguyên text.`)) return;
+    setIsUpdatingMetadata(true);
+    try {
+       const updatedCats = roomTypes.filter(c => c !== cat);
+       const { error } = await supabase.auth.updateUser({ data: { room_types: updatedCats } });
+       if (error) throw error;
+       
+       setRoomTypes(updatedCats);
+       if (newRoomType === cat && updatedCats.length > 0) setNewRoomType(updatedCats[0]);
+    } catch(err: any) {
+       alert("Lỗi xóa Hạng phòng: " + err.message);
+    } finally {
+       setIsUpdatingMetadata(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -116,17 +167,41 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
                 <div className="flex-1">
                    <label className="text-xs text-slate-500 mb-1 block">Hạng phòng</label>
                    <select value={newRoomType} onChange={e => setNewRoomType(e.target.value)} className="w-full border border-slate-200 rounded px-3 py-2 outline-none focus:border-coto-blue h-10">
-                     <option>Phòng Đơn</option>
-                     <option>Phòng Đôi</option>
-                     <option>Phòng Gia Đình</option>
-                     <option>Dorm (Tập thể)</option>
-                     <option>VIP</option>
+                     {roomTypes.map((cat, idx) => (
+                       <option key={idx} value={cat}>{cat}</option>
+                     ))}
                    </select>
                 </div>
-                <button type="submit" disabled={isAdding} className="bg-coto-blue text-white h-10 px-6 rounded font-bold flex items-center justify-center gap-2 hover:bg-coto-blue/90 disabled:opacity-50">
+                <button type="submit" disabled={isAdding || roomTypes.length === 0} className="bg-coto-blue text-white h-10 px-6 rounded font-bold flex items-center justify-center gap-2 hover:bg-coto-blue/90 disabled:opacity-50">
                   {isAdding ? <Loader2 size={16} className="animate-spin" /> : <><Plus size={16} /> Thêm</>}
                 </button>
               </form>
+           </div>
+           
+           {/* Manage Room Category Form */}
+           <div className="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row gap-6">
+              <div className="flex-1">
+                <h3 className="font-bold text-slate-700 mb-1 text-sm uppercase">Quản lý Hạng Phòng</h3>
+                <p className="text-xs text-slate-500 mb-3">Tùy chỉnh danh sách các loại phòng (VD: Phòng View Biển...)</p>
+                
+                <form onSubmit={handleAddCategory} className="flex gap-2">
+                   <input required type="text" placeholder="Tên Hạng mới..." value={newCustomCat} onChange={e => setNewCustomCat(e.target.value)} className="border border-slate-200 rounded px-3 py-1.5 outline-none focus:border-coto-blue text-sm flex-1" />
+                   <button type="submit" disabled={isUpdatingMetadata} className="bg-slate-800 text-white px-3 rounded font-bold text-sm hover:bg-slate-700 disabled:opacity-50">Thêm</button>
+                </form>
+              </div>
+              <div className="flex-1 max-h-24 overflow-y-auto">
+                 <div className="flex flex-wrap gap-2">
+                   {roomTypes.length === 0 && <span className="text-xs text-slate-400">Chưa có hạng phòng nào.</span>}
+                   {roomTypes.map((cat, idx) => (
+                      <div key={idx} className="bg-white border flex items-center border-slate-200 rounded text-xs overflow-hidden">
+                        <span className="px-2 py-1 font-medium">{cat}</span>
+                        <button onClick={() => handleDeleteCategory(cat)} className="bg-rose-50 text-rose-500 p-1 hover:bg-rose-500 hover:text-white transition">
+                          <X size={12}/>
+                        </button>
+                      </div>
+                   ))}
+                 </div>
+              </div>
            </div>
 
            {/* Room List grid */}
