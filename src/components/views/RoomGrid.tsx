@@ -199,7 +199,6 @@ export function RoomGrid() {
                     )
                  })}
                </div>
-               </div>
             </div>
           ))}
         </div>
