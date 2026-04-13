@@ -249,12 +249,17 @@ export default function SuperAdminPage() {
              <div className="grid grid-cols-2 gap-4">
                 <div>
                    <label className="text-xs text-zinc-500 block mb-2 uppercase">Số ngày hạn</label>
-                   <input 
-                     type="number" 
-                     value={duration}
-                     onChange={e => setDuration(e.target.value)}
-                     className="w-full bg-[#1a1a1a] border border-zinc-700 p-3 rounded text-zinc-300 outline-none focus:border-rose-500" 
-                   />
+                   <select
+                 value={duration}
+                 onChange={e => setDuration(Number(e.target.value))}
+                 className="w-full bg-[#1a1a1a] border border-zinc-700 p-3 rounded text-white focus:border-red-500 transition outline-none"
+               >
+                 <option value={7}>Dùng thử (7 Ngày)</option>
+                 <option value={30}>1 Tháng (30 Ngày)</option>
+                 <option value={90}>3 Tháng (90 Ngày)</option>
+                 <option value={365}>1 Năm (365 Ngày)</option>
+                 <option value={36500}>Vĩnh Viễn (Trọn Đời)</option>
+               </select>
                 </div>
                 <div>
                    <label className="text-xs text-zinc-500 block mb-2 uppercase">Ghi chú (Tên KS)</label>
@@ -333,7 +338,9 @@ export default function SuperAdminPage() {
                          <td className="p-4 font-bold text-zinc-200 tracking-wider bg-zinc-800/20">{lic.key_code}</td>
                          <td className="p-4">{lic.facility_note || '----'}</td>
                          <td className="p-4">
-                           <span className="text-emerald-500 border border-emerald-900 bg-emerald-500/10 px-2 py-1 rounded text-xs">{lic.duration_days} Ngày</span>
+                           <span className="text-emerald-500 border border-emerald-900 bg-emerald-500/10 px-2 py-1 rounded text-xs">
+                             {lic.duration_days === 36500 ? 'VĨNH VIỄN' : `${lic.duration_days} Ngày`}
+                           </span>
                          </td>
                          <td className="p-4 flex flex-col items-end gap-1">
                             {lic.status === 'active' && <span className="bg-emerald-900/50 text-emerald-400 px-3 py-0.5 rounded-full text-xs font-bold ring-1 ring-emerald-500/50 block w-fit">ACTIVE</span>}
