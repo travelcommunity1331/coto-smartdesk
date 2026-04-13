@@ -178,6 +178,10 @@ export default function SuperAdminPage() {
     return new Intl.DateTimeFormat('vi-VN', { dateStyle: 'short', timeStyle: 'short' }).format(d);
   };
 
+  const hasActiveLicense = (userId: string) => {
+    return licenses.some(lic => lic.activated_by === userId && lic.status === 'active');
+  };
+
   if (!isUnlocked) {
     return (
       <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center p-4 selection:bg-rose-500">
