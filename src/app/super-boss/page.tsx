@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Database, Plus, RefreshCcw, Slash, Tag, Key, Loader2, CheckCircle2, Users, Phone, Mail, Building, Lock } from 'lucide-react';
+import { Database, Plus, RefreshCcw, Slash, Tag, Key, Loader2, CheckCircle2, Users, Phone, Mail, Building, Lock, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { supabase } from "@/lib/supabase";
 
@@ -82,16 +82,26 @@ export default function SuperAdminPage() {
         .from('profiles')
         .select('*')
         .order('created_at', { ascending: false });
-      
-      if (error) {
-        console.error("Error fetching profiles:", error);
-        return;
-      }
-      if (data) setProfiles(data);
+      if (error) throw error;
+      setProfiles(data || []);
     } catch (err) {
       console.error(err);
     } finally {
       setFetchingProfiles(false);
+    }
+  };
+
+  const handleDeleteProfile = async (id: string) => {
+    if (!confirm("RÁC NHÀ SẠCH CỬA: Sếp có chắc chắn muốn xóa sổ vĩnh viễn hồ sơ rác này khỏi hệ thống?")) return;
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', id);
+      if (error) throw error;
+      fetchProfiles();
+    } catch (err) {
+      alert("Xóa thất bại. Database báo lỗi: " + err);
     }
   };
 
