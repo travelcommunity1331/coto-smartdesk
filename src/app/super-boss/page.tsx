@@ -251,7 +251,7 @@ export default function SuperAdminPage() {
                    <label className="text-xs text-zinc-500 block mb-2 uppercase">Số ngày hạn</label>
                    <select
                  value={duration}
-                 onChange={e => setDuration(Number(e.target.value))}
+                 onChange={e => setDuration(e.target.value)}
                  className="w-full bg-[#1a1a1a] border border-zinc-700 p-3 rounded text-white focus:border-red-500 transition outline-none"
                >
                  <option value={7}>Dùng thử (7 Ngày)</option>
