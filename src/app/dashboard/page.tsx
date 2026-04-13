@@ -1,9 +1,9 @@
 "use client";
 import { useState } from "react";
 import { CalendarDays, LayoutDashboard, Settings, BedDouble, Key, AlertCircle, CheckCircle2 } from "lucide-react";
-import { TapeChart } from "../components/TapeChart";
-import { MobileRoomList } from "../components/MobileRoomList";
-import { PosMenu } from "../components/PosMenu";
+import { TapeChart } from "@/components/TapeChart";
+import { MobileRoomList } from "@/components/MobileRoomList";
+import { PosMenu } from "@/components/PosMenu";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState("");
