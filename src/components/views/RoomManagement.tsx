@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/lib/supabase";
-import { Plus, Import, Download, Menu, Search, Trash2, X, Loader2 } from 'lucide-react';
+import { Plus, Import, Download, Menu, Search, Trash2, X, Loader2, Image } from 'lucide-react';
 import { SettingsModal } from "@/components/SettingsModal";
 
 export function RoomManagement() {
