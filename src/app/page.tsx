@@ -58,14 +58,15 @@ export default function AuthPage() {
         // Cố tình đẩy thẳng vào dashboard cho trải nghiệm nhanh
         router.push("/dashboard");
       }
-    } catch (err: any) {
+    } catch (err) {
+      const errorStr = err instanceof Error ? err.message : String(err);
       // Dịch một số lỗi cơ bản
-      if (err.message.includes("Invalid login")) {
+      if (errorStr.includes("Invalid login")) {
         setError("Sai email hoặc mật khẩu.");
-      } else if (err.message.includes("User already registered")) {
+      } else if (errorStr.includes("User already registered")) {
         setError("Email này đã được đăng ký.");
       } else {
-        setError(err.message || "Có lỗi xảy ra, vui lòng thử lại.");
+        setError(errorStr || "Có lỗi xảy ra, vui lòng thử lại.");
       }
     } finally {
       setLoading(false);

@@ -4,7 +4,6 @@ import { CalendarDays, LayoutDashboard, Settings, BedDouble, Key, AlertCircle, C
 import { TapeChart } from "../components/TapeChart";
 import { MobileRoomList } from "../components/MobileRoomList";
 import { PosMenu } from "../components/PosMenu";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState("");
