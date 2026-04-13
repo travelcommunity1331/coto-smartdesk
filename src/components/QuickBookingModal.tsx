@@ -115,7 +115,7 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
                       className="border rounded px-2 py-1.5 w-full outline-none"
                     >
                        <option value="">Chọn phòng...</option>
-                       {rooms.map(r => <option key={r.id} value={r.id}>{r.name}</option>)}
+                       {rooms.map((r: any) => <option key={r.id} value={r.id}>{r.name}</option>)}
                     </select>
                  </div>
                  <div><select className="border rounded px-2 py-1.5 w-full"><option>Ngày</option></select></div>

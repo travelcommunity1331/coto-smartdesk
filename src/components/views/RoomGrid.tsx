@@ -80,12 +80,12 @@ export function RoomGrid() {
        </div>
 
        <div className="p-4 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 120px)' }}>
-          {Object.keys(groupedRooms).map(groupName => (
+          {Object.keys(groupedRooms).map((groupName: string) => (
             <div key={groupName} className="mb-6">
                <h3 className="text-sm font-bold text-slate-800 mb-3 bg-slate-200 px-3 py-1 inline-block rounded-sm">{groupName} ({groupedRooms[groupName].length})</h3>
                
                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                 {groupedRooms[groupName].map(room => {
+                 {groupedRooms[groupName].map((room: any) => {
                     const activeBooking = bookings.find(b => b.room_id === room.id && b.status === 'checked_in');
                     const isOccupied = !!activeBooking;
 

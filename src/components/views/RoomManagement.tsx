@@ -155,7 +155,7 @@ export function RoomManagement() {
                      <tbody className="divide-y divide-slate-100">
                         {rooms.length === 0 ? (
                            <tr><td colSpan={9} className="p-8 text-center text-slate-400">Không có dữ liệu phòng. Nhấn "Thêm mới"</td></tr>
-                        ) : rooms.map((r, i) => {
+                        ) : rooms.map((r: any, i: number) => {
                            const formatMoney = (val: number) => new Intl.NumberFormat('vi-VN').format(val);
                            const isVip = String(r.type).toLowerCase().includes("vip");
                            const base = r.price_per_night || 0;

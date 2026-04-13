@@ -228,7 +228,7 @@ export function DashboardOverview() {
             {history.length === 0 ? (
                <div className="text-xs text-slate-400 text-center">Chưa có giao dịch.</div>
             ) : (
-               history.map((log) => (
+               history.map((log: any) => (
                  <div key={log.id} className="flex gap-3 items-start group">
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${getStatusIconColor(log.status)}`}>
                        <FileArchive size={14} />
