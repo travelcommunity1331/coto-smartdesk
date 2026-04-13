@@ -453,14 +453,14 @@ export default function SuperAdminPage() {
                               <div className="flex gap-2">
                                 <button 
                                   onClick={() => alert("Sale đã được ghi nhận. Vui lòng di chuyển lên Máy Dập Key để cấp mã cho khách này!")}
-                                  className="text-xs underline text-zinc-400 hover:text-emerald-400 opacity-0 group-hover:opacity-100 transition"
+                                  className="text-xs underline text-zinc-400 hover:text-emerald-400 transition"
                                 >
                                   Đã chốt &rarr;
                                 </button>
                                 <button 
                                   onClick={() => handleDeleteProfile(pf.id)}
                                   title="Xóa hồ sơ rác"
-                                  className="text-rose-500/50 hover:text-rose-400 hover:bg-rose-900/20 p-1.5 rounded transition opacity-0 group-hover:opacity-100"
+                                  className="text-rose-500/50 hover:text-rose-400 hover:bg-rose-900/20 p-1.5 rounded transition"
                                 >
                                   <Trash2 size={14} />
                                 </button>
