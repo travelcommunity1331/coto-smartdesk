@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from "@/lib/supabase";
 import { RoomDetailModal } from "@/components/RoomDetailModal";
 import { QuickBookingModal } from "@/components/QuickBookingModal";
-import { MoreVertical, Sparkles } from 'lucide-react';
+import { MoreVertical, Sparkles, Clock } from 'lucide-react';
 
 export function RoomGrid() {
   const [rooms, setRooms] = useState<any[]>([]);
