@@ -35,7 +35,7 @@ export default function SuperAdminPage() {
   useEffect(() => {
     // Check if previously unlocked
     const savedPin = sessionStorage.getItem('boss_pin');
-    if (savedPin === '686868') {
+    if (savedPin === '131331') {
       setIsUnlocked(true);
       fetchLicenses();
       fetchProfiles();
@@ -43,7 +43,7 @@ export default function SuperAdminPage() {
   }, []);
 
   const handleUnlock = () => {
-    if (passcode === '686868') {
+    if (passcode === '131331') {
       sessionStorage.setItem('boss_pin', passcode);
       setIsUnlocked(true);
       setPinError(false);
