@@ -4,6 +4,7 @@ import { CalendarDays, LayoutDashboard, Settings, BedDouble, Key, AlertCircle, C
 import { TapeChart } from "@/components/TapeChart";
 import { MobileRoomList } from "@/components/MobileRoomList";
 import { PosMenu } from "@/components/PosMenu";
+import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [licenseKey, setLicenseKey] = useState("");
@@ -11,17 +12,52 @@ export default function Home() {
   const [message, setMessage] = useState("");
 
   const handleActivate = async () => {
+    if (!licenseKey.trim()) return;
     setStatus("loading");
-    // Giả lập call API hoặc gọi Supabase thật nếu có bảng licenses
-    setTimeout(() => {
-      if (licenseKey.length < 6) {
+    setMessage("");
+
+    try {
+      // 1. Kiểm tra key trong Database
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .eq('key_code', licenseKey.trim().toUpperCase())
+        .single();
+        
+      if (error || !data) {
         setStatus("error");
-        setMessage("Mã không hợp lệ hoặc đã hết hạn.");
-      } else {
-        setStatus("success");
-        setMessage("Kích hoạt thành công! Cảm ơn bạn đã sử dụng CoTo SmartDesk bản quyền.");
+        setMessage("Mã không hợp lệ hoặc không tồn tại.");
+        return;
       }
-    }, 1500);
+
+      // 2. Chặn key đã dùng
+      if (data.status === 'used') {
+        setStatus("error");
+        setMessage("Mã bản quyền này đã được kích hoạt trước đó!");
+        return;
+      }
+
+      // 3. Đánh dấu Key đã sử dụng
+      const { error: updateError } = await supabase
+        .from('licenses')
+        .update({ status: 'used' })
+        .eq('id', data.id);
+
+      if (updateError) {
+        setStatus("error");
+        setMessage("Lỗi hệ thống khi kích hoạt: " + updateError.message);
+        return;
+      }
+
+      // 4. Thành công
+      setStatus("success");
+      setMessage(`Kích hoạt gói ${data.duration_days} ngày thành công! Hệ thống đang tải lại...`);
+      
+    } catch (err) {
+      console.error(err);
+      setStatus("error");
+      setMessage("Lỗi kết nối hệ thống máy chủ.");
+    }
   };
 
   return (
