@@ -57,10 +57,6 @@ export function PosMenu() {
         .order('check_in', { ascending: true });
         
       setActiveBookings(bookingsData || []);
-      if (bookingsData && bookingsData.length > 0) {
-         setSelectedBookingId(bookingsData[0].id);
-      }
-
     } catch (err) {
       console.error(err);
     } finally {
@@ -184,6 +180,7 @@ export function PosMenu() {
                value={selectedBookingId}
                onChange={e => setSelectedBookingId(e.target.value)}
              >
+               <option value="">-- Chọn khách / phòng --</option>
                {activeBookings.map(b => (
                  <option key={b.id} value={b.id}>
                    {(b.rooms as any)?.name} - {b.guest_name}

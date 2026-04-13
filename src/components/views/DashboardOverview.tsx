@@ -1,9 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/lib/supabase";
-import { RoomGrid } from "@/components/views/RoomGrid";
-import { PosMenu } from "@/components/PosMenu";
-import { FileText, CheckCircle, Clock, XCircle, ArrowUpRight, ArrowDownRight, DollarSign, Wallet, FileArchive } from 'lucide-react';
+import { FileText, CheckCircle, Clock, XCircle, ArrowUpRight, ArrowDownRight, DollarSign, Wallet, FileArchive, Settings } from 'lucide-react';
 import { BookingModal } from "@/components/BookingModal";
 
 export function DashboardOverview() {
@@ -173,73 +171,100 @@ export function DashboardOverview() {
            </div>
         </div>
 
-        {/* CÔNG SUẤT VÀ LƯỚI PHÒNG */}
-        <div className="bg-white rounded shadow-sm border border-slate-200 mb-6 p-4">
+        {/* CÔNG SUẤT SỬ DỤNG PHÒNG THÁNG NÀY */}
+        <div className="bg-white rounded shadow-sm border border-slate-200 mb-6 p-4 h-[400px] flex flex-col">
            <div className="flex justify-between items-center mb-4">
-             <h3 className="font-bold text-sm text-slate-800 uppercase">Trạng thái buồng phòng</h3>
-             <button onClick={() => setIsBookingOpen(true)} className="bg-[#0070f4] text-white px-4 py-1.5 rounded text-sm font-bold shadow-sm hover:opacity-90">
-                + Đặt phòng mới
-             </button>
+             <h3 className="font-bold text-[13px] text-slate-800 uppercase">Công suất sử dụng phòng tháng này</h3>
+             <span className="text-[13px] text-slate-500 cursor-pointer">Tháng này ▾</span>
            </div>
-           {/* Sơ đồ phòng Lưới dạng KiotViet (Thay cho TapeChart cũ) */}
-           <div className="w-full">
-             <RoomGrid key={refreshKey} />
+           <div className="flex items-center gap-2 mb-4">
+              <div className="w-8 h-8 rounded-full bg-[#0070f4] text-white flex items-center justify-center font-bold text-xs">%</div>
+              <div>
+                <div className="text-xs text-slate-500">Trung bình</div>
+                <div className="font-bold text-lg">{metrics.occupancy}%</div>
+              </div>
            </div>
-        </div>
-        
-        {/* KHU VỰC BÁN CHÉO (POS MENU) NẰM KẾT HỢP DƯỚI CÙNG ĐỂ CHỐT ĐƠN */}
-        <div className="w-full">
-          <PosMenu key={refreshKey} />
+           
+           {/* Chart Fake area */}
+           <div className="flex-1 border-t border-b border-l border-slate-200 relative mt-2 text-[11px] text-slate-500">
+              <div className="absolute left-[-35px] bottom-[10%] w-8 text-right">0%</div>
+              <div className="absolute left-[-35px] bottom-[30%] w-8 text-right">20%</div>
+              <div className="absolute left-[-35px] bottom-[50%] w-8 text-right">50%</div>
+              <div className="absolute left-[-35px] bottom-[70%] w-8 text-right">80%</div>
+              <div className="absolute left-[-35px] bottom-[90%] w-8 text-right">100%</div>
+              
+              {/* Lines */}
+              <div className="absolute w-full h-[1px] bg-slate-100 bottom-[10%]"></div>
+              <div className="absolute w-full h-[1px] bg-slate-100 bottom-[30%]"></div>
+              <div className="absolute w-full h-[1px] bg-slate-100 bottom-[50%]"></div>
+              <div className="absolute w-full h-[1px] bg-slate-100 bottom-[70%]"></div>
+              <div className="absolute w-full h-[1px] bg-slate-100 bottom-[90%]"></div>
+              
+              <div className="absolute bottom-[-20px] left-10">06</div>
+              <div className="absolute bottom-[-20px] left-20">07</div>
+              <div className="absolute bottom-[-20px] left-30">08</div>
+              <div className="absolute bottom-[-20px] left-40">09</div>
+              <div className="absolute bottom-[-20px] left-50">10</div>
+              
+              <svg className="absolute w-full h-full" preserveAspectRatio="none">
+                 <polyline points="0,200 40,200 80,200 120,200 160,200 200,160 220,180 250,160" fill="none" stroke="#0070f4" strokeWidth="2" />
+                 <circle cx="200" cy="160" r="4" fill="#0070f4" />
+                 <circle cx="220" cy="180" r="4" fill="#0070f4" />
+                 <circle cx="250" cy="160" r="4" fill="#0070f4" />
+              </svg>
+              
+              <div className="absolute bottom-[-40px] left-0 w-full flex justify-center items-center gap-2 text-slate-800">
+                 <div className="w-2 h-2 bg-[#0070f4]"></div> Chi nhánh trung tâm
+              </div>
+           </div>
         </div>
 
       </div>
 
       {/* CỘT BÊN PHẢI (SIDEBAR THAO TÁC + NHẬT KÝ) */}
-      <div className="w-80 border-l border-slate-200 bg-white shadow-[-2px_0_5px_rgba(0,0,0,0.02)] hidden lg:flex flex-col">
+      <div className="w-80 border-l border-slate-200 bg-slate-50 hidden lg:flex flex-col p-4 space-y-4">
         
-        {/* Nút tác vụ nhanh */}
-        <div className="p-4 grid grid-cols-2 gap-2 border-b border-slate-100 shrink-0">
-          <button className="bg-slate-50 hover:bg-slate-100 border border-slate-200 p-3 rounded-lg flex flex-col items-center justify-center gap-1 transition">
-             <Wallet size={20} className="text-[#0070f4]" />
-             <span className="text-xs font-semibold text-slate-700">Vay vốn</span>
-          </button>
-          <button className="bg-slate-50 hover:bg-slate-100 border border-slate-200 p-3 rounded-lg flex flex-col items-center justify-center gap-1 transition">
-             <DollarSign size={20} className="text-[#00a92f]" />
-             <span className="text-xs font-semibold text-slate-700">Thanh toán</span>
-          </button>
+        {/* Vay vốn / Thanh toán */}
+        <div className="bg-white rounded mb-2 flex justify-around p-3 shadow-sm border border-slate-200">
+           <div className="flex flex-col items-center gap-1 cursor-pointer hover:opacity-80">
+              <DollarSign size={20} className="text-[#0070f4]" />
+              <span className="text-[13px] font-medium text-slate-700">Vay vốn</span>
+           </div>
+           <div className="flex flex-col items-center gap-1 cursor-pointer hover:opacity-80">
+              <Wallet size={20} className="text-[#00a92f]" />
+              <span className="text-[13px] font-medium text-slate-700">Thanh toán</span>
+           </div>
         </div>
 
-        <div className="p-4 border-b border-slate-100 shrink-0">
-          <div className="bg-gradient-to-r from-blue-50 to-[#eef2ff] p-3 rounded-lg border border-blue-100">
-             <p className="text-xs font-bold text-slate-700 mb-1">Mã giảm giá Khách sạn?</p>
-             <button className="bg-[#0070f4] text-white text-xs font-bold px-3 py-1.5 rounded shadow-sm w-full mt-2">
-               Cài đặt chiết khấu
-             </button>
-          </div>
+        {/* Hóa đơn điện tử */}
+        <div className="bg-blue-50/50 p-4 rounded border border-blue-200 shadow-sm relative overflow-hidden">
+           <h3 className="text-[13px] font-bold text-slate-800 leading-snug pr-4">Phát hành hóa đơn điện tử khởi tạo từ máy tính tiền</h3>
+           <div className="flex gap-2 mt-4 text-[13px] font-semibold">
+              <button className="bg-[#0070f4] text-white px-4 py-1.5 rounded hover:bg-blue-600 transition">Cài đặt ngay</button>
+              <button className="text-[#0070f4] px-2 hover:bg-blue-50 rounded">Không hiển thị lại</button>
+           </div>
         </div>
 
         {/* Các hoạt động gần đây (Timeline) */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          <div className="p-4 pb-2 border-b border-slate-100 shrink-0 bg-slate-50">
-             <h3 className="text-xs font-bold text-slate-700 uppercase">Các hoạt động gần đây</h3>
+        <div className="flex-1 flex flex-col overflow-hidden bg-white rounded border border-slate-200 shadow-sm">
+          <div className="p-4 py-3 border-b border-slate-100 shrink-0">
+             <h3 className="text-xs font-bold text-slate-800 uppercase">Các hoạt động gần đây</h3>
           </div>
-          <div className="p-4 overflow-y-auto space-y-4">
+          <div className="p-4 overflow-y-auto space-y-6">
             
             {history.length === 0 ? (
                <div className="text-xs text-slate-400 text-center">Chưa có giao dịch.</div>
             ) : (
                history.map((log: any) => (
                  <div key={log.id} className="flex gap-3 items-start group">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 shadow-sm ${getStatusIconColor(log.status)}`}>
-                       <FileArchive size={14} />
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow-sm bg-[#0070f4] text-white`}>
+                       <FileText size={12} />
                     </div>
-                    <div className="text-sm">
-                       <p className="text-slate-800 leading-snug">
-                         <span className="font-bold text-[#0070f4]">Lễ tân</span> vừa thao tác đơn <span className="font-semibold">{log.guest_name}</span> 
-                         {log.status === 'checked_in' ? ' (Nhận phòng xếp khách)' : ''}
-                         {log.status === 'cancelled' ? ' (Hủy phòng/Hoàn tiền)' : ''}
+                    <div className="text-[13px] leading-snug">
+                       <p className="text-slate-800">
+                         <span className="font-bold text-[#0070f4]">Lễ tân</span> vừa <span className="text-[#0070f4]">nhận đặt phòng</span> với giá trị <span className="font-bold text-slate-800">{formatVND(log.total_price || 0)}</span>
                        </p>
-                       <p className="text-[11px] text-slate-400 mt-1">{formatTimeAgo(log.created_at)}</p>
+                       <p className="text-[11px] text-slate-500 mt-1">{formatTimeAgo(log.created_at)}</p>
                     </div>
                  </div>
                ))

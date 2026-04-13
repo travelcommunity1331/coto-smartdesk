@@ -13,6 +13,7 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
   });
   const [rooms, setRooms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [customTotal, setCustomTotal] = useState("");
 
   useEffect(() => {
     if (isOpen) {
@@ -48,7 +49,8 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
         check_out: formData.check_out,
         status: status, // 'checked_in' or 'reserved'
         booking_source: 'Lễ Tân',
-        notes: formData.notes
+        notes: formData.notes,
+        total_price: customTotal ? parseInt(customTotal.replace(/\D/g, '')) : defaultTotal
       });
       if (error) throw error;
       
@@ -62,6 +64,14 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
   };
 
   if (!isOpen) return null;
+
+  const checkInDate = new Date(formData.check_in);
+  const checkOutDate = new Date(formData.check_out);
+  const diffTime = checkOutDate.getTime() - checkInDate.getTime();
+  const diffDays = Math.max(1, Math.ceil(diffTime / (1000 * 3600 * 24)));
+
+  const defaultTotal = selectedRoomDetails ? selectedRoomDetails.price_per_night * diffDays : 0;
+  const displayTotal = customTotal ? parseInt(customTotal.replace(/\D/g, '') || "0") : defaultTotal;
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[100] backdrop-blur-[2px]">
@@ -125,10 +135,18 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
                  <div className="flex items-center gap-1 border border-slate-200 rounded px-2 py-1">
                     <input type="date" value={formData.check_out} onChange={e=>setFormData({...formData, check_out: e.target.value})} className="outline-none w-full text-xs" />
                  </div>
-                 <div className="text-center font-medium">1 ngày</div>
-                 <div className="text-right font-bold">{selectedRoomDetails ? new Intl.NumberFormat('vi-VN').format(selectedRoomDetails.price_per_night) : 0}</div>
+                 <div className="text-center font-medium">{diffDays} ngày</div>
+                 <div className="text-right font-bold">
+                    <input 
+                      type="text" 
+                      className="w-full bg-transparent text-right outline-none border-b border-dashed border-slate-300 focus:border-[#0070f4]"
+                      value={customTotal || new Intl.NumberFormat('vi-VN').format(displayTotal)}
+                      onChange={(e) => setCustomTotal(e.target.value)}
+                      placeholder="Nhập giá..."
+                    />
+                 </div>
               </div>
-              <div className="flex text-[#0070f4] font-medium text-sm gap-4 mt-2">
+              <div className="flex text-[#0070f4] font-medium text-sm gap-4 mt-2 hidden">
                  <button className="flex items-center gap-1"><span className="text-lg">+</span> Chọn thêm phòng</button>
                  <button className="flex items-center gap-1"><span className="text-lg">+</span> Sản phẩm, dịch vụ</button>
               </div>
@@ -147,21 +165,20 @@ export function QuickBookingModal({ isOpen, onClose, onSuccess, preselectedRoom 
              </div>
              
              <div className="w-1/3 text-sm">
-                <div className="flex justify-between py-1 font-bold">
-                   <span>Khách cần trả</span>
-                   <span className="text-[#1b8655]">{selectedRoomDetails ? new Intl.NumberFormat('vi-VN').format(selectedRoomDetails.price_per_night) : 0}</span>
-                </div>
-                <div className="flex justify-between py-1 font-bold mt-2">
-                   <div>Khách thanh toán <br/><span className="text-slate-400 font-normal text-xs flex items-center gap-1 mt-1">Tiền mặt <span className="text-[10px]">▼</span></span></div>
-                   <input type="text" className="w-24 border-b text-right font-bold outline-none" placeholder="0" />
-                </div>
-             </div>
+                 <div className="flex justify-between py-1 font-bold">
+                    <span>Khách cần trả</span>
+                    <span className="text-[#1b8655]">{new Intl.NumberFormat('vi-VN').format(displayTotal)}</span>
+                 </div>
+                 <div className="flex justify-between py-1 font-bold mt-2">
+                    <div>Khách thanh toán <br/><span className="text-slate-400 font-normal text-xs flex items-center gap-1 mt-1">Tiền mặt <span className="text-[10px]">▼</span></span></div>
+                    <input type="text" className="w-24 border-b text-right font-bold outline-none" placeholder={new Intl.NumberFormat('vi-VN').format(displayTotal)} />
+                 </div>
+              </div>
            </div>
         </div>
 
         {/* Buttons */}
         <div className="bg-slate-50 border-t p-4 flex justify-end gap-3 items-center">
-           <button className="text-sm font-semibold text-slate-500 hover:text-slate-800 mr-2">Thêm tùy chọn</button>
            <button 
              onClick={(e) => handleSubmit(e, 'checked_in')}
              disabled={isLoading}

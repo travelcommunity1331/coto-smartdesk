@@ -31,9 +31,12 @@ export function RoomDetailModal({ isOpen, onClose, onSuccess, booking, room }: a
 
   // Tính số giờ đã ở
   const checkInDate = new Date(booking.check_in).getTime();
+  const checkOutDate = new Date(booking.check_out).getTime();
   const now = new Date().getTime();
   const diffHours = Math.max(1, Math.floor((now - checkInDate) / 3600000));
   const diffMins = Math.floor(((now - checkInDate) % 3600000) / 60000) || 0;
+  const diffDays = Math.max(1, Math.ceil((checkOutDate - checkInDate) / (1000 * 3600 * 24)));
+  const displayTotal = booking.total_price || (room.price_per_night * diffDays);
 
   return (
     <div className="fixed inset-0 bg-slate-900/60 flex items-center justify-center z-[100] backdrop-blur-[2px]">
@@ -87,7 +90,7 @@ export function RoomDetailModal({ isOpen, onClose, onSuccess, booking, room }: a
               <div>
                  <span className="text-slate-400 text-xs block mb-1">Thời gian lưu trú</span>
                  <div className="flex items-center gap-1">
-                    <span className="font-semibold text-slate-800">1 ngày</span>
+                    <span className="font-semibold text-slate-800">{diffDays} ngày</span>
                     <span className="bg-slate-100 text-slate-500 text-[10px] px-1.5 py-0.5 rounded border">Đã sử dụng: {diffHours} giờ {diffMins} phút</span>
                  </div>
               </div>
@@ -101,7 +104,7 @@ export function RoomDetailModal({ isOpen, onClose, onSuccess, booking, room }: a
            <div className="py-4">
               <div className="flex justify-end gap-24 mb-2 text-sm text-slate-600">
                  <span>Tiền phòng / {room.name}</span>
-                 <span className="font-bold text-slate-800">{formatVND(room.price_per_night)}</span>
+                 <span className="font-bold text-slate-800">{formatVND(displayTotal)}</span>
               </div>
               <div className="flex justify-end gap-24 mb-2 text-sm text-slate-600">
                  <span>Khách đã trả</span>

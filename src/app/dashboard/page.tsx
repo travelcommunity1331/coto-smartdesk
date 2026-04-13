@@ -13,12 +13,17 @@ import {
   Phone,
   MessageCircle,
   Menu,
-  ChevronDown
+  ChevronDown 
 } from "lucide-react";
 import { DashboardOverview } from "@/components/views/DashboardOverview";
 import { RoomManagement } from "@/components/views/RoomManagement";
+import { ProductsManagement } from "@/components/views/ProductsManagement";
+import { SettingsModal } from "@/components/SettingsModal";
+import { RoomGrid } from "@/components/views/RoomGrid";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+
+type TabType = 'overview' | 'rooms' | 'letan' | 'products';
 
 export default function Dashboard() {
   const router = useRouter();
@@ -31,7 +36,8 @@ export default function Dashboard() {
   const [loadingAuth, setLoadingAuth] = useState(true);
 
   // View Routing State (Quản lý các tab của giao diện mới)
-  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'rooms'
+  const [activeTab, setActiveTab] = useState<TabType>("overview");
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     checkUserAndLicense();
@@ -182,13 +188,25 @@ export default function Dashboard() {
                  >
                    Phòng <ChevronDown size={14}/>
                  </button>
-                 {/* CSS Hover Dropdown (nếu cần mỡ rộng sau) */}
+                 <div className="absolute top-full left-0 bg-white shadow-xl rounded-b min-w-[200px] hidden group-hover:flex flex-col py-2 border border-slate-200">
+                    <button onClick={() => setActiveTab('rooms')} className="text-left px-4 py-2 hover:bg-slate-50 text-slate-700 w-full">Hạng phòng & Phòng</button>
+                    <button onClick={() => setIsSettingsOpen(true)} className="text-left px-4 py-2 hover:bg-slate-50 text-slate-700 w-full">Thiết lập giá / Hạng</button>
+                 </div>
                </div>
 
-               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Hàng hóa</button>
-               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Giao dịch</button>
-               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Đối tác</button>
-               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Báo cáo</button>
+               <button 
+                 onClick={() => setActiveTab('products')} 
+                 className={`h-full px-4 border-b-2 transition whitespace-nowrap ${activeTab === 'products' ? 'border-white bg-black/5' : 'border-transparent hover:bg-black/10'}`}
+               >
+                 Hàng hóa
+               </button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Giao dịch</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Đối tác</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Nhân viên</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Kênh bán</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Sổ quỹ</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Báo cáo</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition whitespace-nowrap">Thuế & Kế toán</button>
             </div>
          </div>
 
@@ -197,7 +215,10 @@ export default function Dashboard() {
             <span className="text-[13px] font-medium hidden sm:block">
               {user?.user_metadata?.full_name || "Admin"}
             </span>
-            <button className="bg-white text-[#0070f4] text-[13px] font-bold px-4 py-1.5 rounded flex items-center gap-2 hover:bg-blue-50 transition shadow-sm">
+            <button 
+               onClick={() => setActiveTab('letan')}
+               className={`bg-white text-[#0070f4] text-[13px] font-bold px-4 py-1.5 rounded flex items-center gap-2 transition shadow-sm ${activeTab === 'letan' ? 'ring-2 ring-blue-300' : 'hover:bg-blue-50'}`}
+            >
                <UserSquare2 size={16}/> Lễ tân
             </button>
          </div>
@@ -207,8 +228,19 @@ export default function Dashboard() {
       <main className="flex-1 overflow-hidden bg-[#f3f4f6]">
          {activeTab === 'overview' && <DashboardOverview />}
          {activeTab === 'rooms' && <RoomManagement />}
+         {activeTab === 'products' && <ProductsManagement />}
+         {activeTab === 'letan' && (
+           <div className="h-full flex flex-col p-4 bg-white overflow-hidden relative">
+              <RoomGrid />
+           </div>
+         )}
       </main>
       
+      <SettingsModal 
+         isOpen={isSettingsOpen} 
+         onClose={() => setIsSettingsOpen(false)} 
+         onSuccess={() => {}}
+      />
     </div>
   );
 }
