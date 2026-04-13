@@ -14,7 +14,7 @@ export function SettingsModal({ isOpen, onClose, onSuccess }: SettingsModalProps
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   
-  // Create Room State
+  const [newRoomName, setNewRoomName] = useState("");
   const [newRoomType, setNewRoomType] = useState("");
   const [isAdding, setIsAdding] = useState(false);
   
