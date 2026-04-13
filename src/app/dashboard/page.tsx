@@ -5,6 +5,8 @@ import { TapeChart } from "@/components/TapeChart";
 import { MobileRoomList } from "@/components/MobileRoomList";
 import { PosMenu } from "@/components/PosMenu";
 import { DashboardMetrics } from "@/components/DashboardMetrics";
+import { BookingModal } from "@/components/BookingModal";
+import { SettingsModal } from "@/components/SettingsModal";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -17,6 +19,13 @@ export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [hasLicense, setHasLicense] = useState(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
+
+  // Modal States
+  const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0); // Trigger reload for child components
+
+  const triggerReload = () => setRefreshKey(prev => prev + 1);
 
   // Khởi động trinh sát Session
   useEffect(() => {
@@ -147,9 +156,9 @@ export default function Home() {
         </nav>
         
         <div className="pt-4 border-t border-slate-700">
-          <a href="#" className="flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
+          <button onClick={() => setIsSettingsOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
             <Settings size={20} /> Cài Đặt
-          </a>
+          </button>
         </div>
       </aside>
 
@@ -193,13 +202,13 @@ export default function Home() {
              <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 p-6 min-h-[400px]">
                 <div className="flex justify-between items-center mb-4">
                    <h3 className="text-lg font-bold">Sơ đồ Lưu trú 7 ngày tới</h3>
-                   <button className="hidden md:block bg-coto-blue text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-coto-blue/90">
+                   <button onClick={() => setIsBookingOpen(true)} className="hidden md:block bg-coto-blue text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-coto-blue/90">
                       + Đặt phòng mới
                    </button>
                 </div>
                 
                 <div className="hidden md:block">
-                   <TapeChart />
+                   <TapeChart key={refreshKey} />
                 </div>
                 
                 <MobileRoomList />
@@ -207,7 +216,7 @@ export default function Home() {
              
              {/* Component Bán dịch vụ bổ trợ bên phải */}
              <div className="xl:col-span-1 hidden xl:block">
-                <PosMenu />
+                <PosMenu key={refreshKey} />
              </div>
            </div>
 
@@ -262,6 +271,19 @@ export default function Home() {
 
         </div>
       </main>
+
+      {/* CÁC POPUP MỞ RỘNG CỦA HỆ THỐNG */}
+      <BookingModal 
+        isOpen={isBookingOpen} 
+        onClose={() => setIsBookingOpen(false)} 
+        onSuccess={triggerReload}
+      />
+      
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        onSuccess={triggerReload}
+      />
 
       {/* BOTTOM TAB NAV MẶC ĐỊNH BỊ BLUR NẾU KHÓA KEY */}
       <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-3 z-50 pb-safe ${!hasLicense ? 'opacity-50 pointer-events-none' : ''}`}>
