@@ -95,6 +95,33 @@ export default function SuperAdminPage() {
     }
   };
 
+  const handleExtend = async (id: string, currentDays: number) => {
+    try {
+      const { error } = await supabase
+        .from('licenses')
+        .update({ duration_days: currentDays + 30 })
+        .eq('id', id);
+      if (error) throw error;
+      fetchLicenses();
+    } catch (err) {
+      alert("Lỗi nạp thêm ngày!");
+    }
+  };
+
+  const handleRevoke = async (id: string) => {
+    if (!confirm("Giết chết mã Key này? Khách hàng sẽ bị khóa màn hình ngay lập tức!")) return;
+    try {
+      const { error } = await supabase
+        .from('licenses')
+        .update({ status: 'revoked' })
+        .eq('id', id);
+      if (error) throw error;
+      fetchLicenses();
+    } catch (err) {
+      alert("Lỗi cắt ngưng!");
+    }
+  };
+
   const handleGenerate = async () => {
     setLoading(true);
     setSuccessKey(null);
@@ -308,12 +335,21 @@ export default function SuperAdminPage() {
                          <td className="p-4">
                            <span className="text-emerald-500 border border-emerald-900 bg-emerald-500/10 px-2 py-1 rounded text-xs">{lic.duration_days} Ngày</span>
                          </td>
-                         <td className="p-4 flex gap-2 justify-end">
-                            {lic.status === 'active' ? (
-                               <span className="bg-emerald-900/50 text-emerald-400 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-emerald-500/50 flex items-center gap-1">ACTIVE</span>
-                            ) : (
-                               <span className="bg-rose-900/50 text-rose-400 px-3 py-1 rounded-full text-xs font-bold ring-1 ring-rose-500/50 flex items-center gap-1">USED</span>
-                            )}
+                         <td className="p-4 flex flex-col items-end gap-1">
+                            {lic.status === 'active' && <span className="bg-emerald-900/50 text-emerald-400 px-3 py-0.5 rounded-full text-xs font-bold ring-1 ring-emerald-500/50 block w-fit">ACTIVE</span>}
+                            {lic.status === 'used' && <span className="bg-blue-900/50 text-blue-400 px-3 py-0.5 rounded-full text-xs font-bold ring-1 ring-blue-500/50 block w-fit">USED</span>}
+                            {lic.status === 'revoked' && <span className="bg-rose-900/50 text-rose-400 px-3 py-0.5 rounded-full text-xs font-bold ring-1 ring-rose-500/50 block w-fit">REVOKED (CẮT)</span>}
+
+                            <div className="flex gap-1 mt-1">
+                               <button onClick={() => handleExtend(lic.id, lic.duration_days)} className="bg-zinc-800 hover:bg-emerald-900 border border-zinc-700 text-zinc-300 px-2 py-1 rounded text-xs transition">
+                                 +30 Ngày
+                               </button>
+                               {lic.status !== 'revoked' && (
+                                 <button onClick={() => handleRevoke(lic.id)} className="bg-zinc-800 hover:bg-rose-900 border border-zinc-700 text-zinc-300 px-2 py-1 rounded text-xs transition">
+                                   Cắt
+                                 </button>
+                               )}
+                            </div>
                          </td>
                        </tr>
                      ))

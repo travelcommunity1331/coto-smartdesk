@@ -215,7 +215,11 @@ export default function AuthPage() {
               <div className="space-y-1">
                   <div className="flex justify-between">
                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mật Khẩu</label>
-                     {isLogin && <a href="#" className="text-xs font-semibold text-coto-blue hover:underline">Quên mật khẩu?</a>}
+                     {isLogin && (
+                       <button type="button" onClick={() => alert("Tính năng Khôi phục Mật khẩu qua Email đang được bảo trì. Vui lòng liên hệ Admin!")} className="text-xs font-semibold text-coto-blue hover:underline">
+                         Quên mật khẩu?
+                       </button>
+                     )}
                   </div>
                   <div className="relative">
                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
