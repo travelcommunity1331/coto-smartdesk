@@ -62,13 +62,21 @@ export default function AuthPage() {
       }
     } catch (err) {
       const errorStr = err instanceof Error ? err.message : String(err);
-      // Dịch một số lỗi cơ bản
+      // Dịch các lỗi phổ biến của Supabase sang Tiếng Việt
       if (errorStr.includes("Invalid login")) {
         setError("Sai email hoặc mật khẩu.");
-      } else if (errorStr.includes("User already registered")) {
-        setError("Email này đã được đăng ký.");
+      } else if (errorStr.includes("already registered")) {
+        setError("Email này đã được đăng ký trong hệ thống.");
+      } else if (errorStr.toLowerCase().includes("rate limit")) {
+        setError("Hệ thống phát hiện spam (đăng ký quá nhiều). Sếp vui lòng chờ vài phút rồi thử lại, hoặc tạm đổi mạng Wifi/4G khác nhé.");
+      } else if (errorStr.toLowerCase().includes("signups are disabled")) {
+        setError("Hệ thống đã khóa đăng ký mới. Vui lòng báo cho Admin (Super Boss).");
+      } else if (errorStr.toLowerCase().includes("not confirmed")) {
+        setError("Tài khoản này chưa xác nhận Email. Vui lòng mở Email để xác nhận, hoặc dùng Email mới.");
+      } else if (errorStr.toLowerCase().includes("password should be at least")) {
+        setError("Mật khẩu quá ngắn, vui lòng nhập ít nhất 6 ký tự.");
       } else {
-        setError(errorStr || "Có lỗi xảy ra, vui lòng thử lại.");
+        setError("Lỗi máy chủ: " + errorStr);
       }
     } finally {
       setLoading(false);
