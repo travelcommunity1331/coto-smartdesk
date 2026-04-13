@@ -1,17 +1,26 @@
 "use client";
 import { useState, useEffect } from "react";
-import { CalendarDays, LayoutDashboard, Settings, BedDouble, Key, AlertCircle, CheckCircle2, ShieldCheck } from "lucide-react";
-import { TapeChart } from "@/components/TapeChart";
-import { MobileRoomList } from "@/components/MobileRoomList";
-import { PosMenu } from "@/components/PosMenu";
-import { DashboardMetrics } from "@/components/DashboardMetrics";
-import { BookingModal } from "@/components/BookingModal";
-import { SettingsModal } from "@/components/SettingsModal";
-import { HistoryModal } from "@/components/HistoryModal";
+import { 
+  Building2, 
+  Key, 
+  AlertCircle, 
+  CheckCircle2, 
+  Settings, 
+  Users, 
+  CreditCard, 
+  FileText,
+  UserSquare2,
+  Phone,
+  MessageCircle,
+  Menu,
+  ChevronDown
+} from "lucide-react";
+import { DashboardOverview } from "@/components/views/DashboardOverview";
+import { RoomManagement } from "@/components/views/RoomManagement";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
-export default function Home() {
+export default function Dashboard() {
   const router = useRouter();
   const [licenseKey, setLicenseKey] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "error" | "success">("idle");
@@ -21,15 +30,9 @@ export default function Home() {
   const [hasLicense, setHasLicense] = useState(false);
   const [loadingAuth, setLoadingAuth] = useState(true);
 
-  // Modal States
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // Trigger reload for child components
+  // View Routing State (Quản lý các tab của giao diện mới)
+  const [activeTab, setActiveTab] = useState("overview"); // 'overview', 'rooms'
 
-  const triggerReload = () => setRefreshKey(prev => prev + 1);
-
-  // Khởi động trinh sát Session
   useEffect(() => {
     checkUserAndLicense();
   }, []);
@@ -37,17 +40,14 @@ export default function Home() {
   const checkUserAndLicense = async () => {
     setLoadingAuth(true);
     try {
-      // 1. Kiểm tra lính gác: Khách đã đăng nhập chưa
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        // Chưa đăng nhập thì đá về trang chủ
         router.push('/');
         return;
       }
       setUser(user);
 
-      // 2. Chó săn đánh hơi License của Khách
-      const { data: activeLicense, error } = await supabase
+      const { data: activeLicense } = await supabase
         .from('licenses')
         .select('*')
         .eq('activated_by', user.id)
@@ -70,7 +70,6 @@ export default function Home() {
     setMessage("");
 
     try {
-      // 1. Kiểm tra key trong Database
       const { data, error } = await supabase
         .from('licenses')
         .select('*')
@@ -83,238 +82,133 @@ export default function Home() {
         return;
       }
 
-      // 2. Chặn key đã dùng
-      // Đặc biệt nếu mã này có trạng thái 'revoked' (bị Cảnh sát trưởng cúp điện)
-      if (data.status === 'used') {
+      if (data.status === 'used' || data.status === 'revoked') {
         setStatus("error");
-        setMessage("Mã bản quyền này đã được kích hoạt trước đó!");
-        return;
-      }
-      if (data.status === 'revoked') {
-        setStatus("error");
-        setMessage("Mã này đã bị vô hiệu hóa bởi Hệ Thống Tổng!");
+        setMessage("Mã này không khả dụng!");
         return;
       }
 
-      // 3. Đánh dấu Key đã sử dụng và Trói vào CCCD (User.id)
       const { error: updateError } = await supabase
         .from('licenses')
-        .update({ 
-          status: 'used',
-          activated_by: user.id,
-          activated_at: new Date().toISOString()
-        })
+        .update({ status: 'used', activated_at: new Date().toISOString(), activated_by: user.id })
         .eq('id', data.id);
 
-      if (updateError) {
-        setStatus("error");
-        setMessage("Lỗi hệ thống khi kích hoạt: " + updateError.message);
-        return;
-      }
+      if (updateError) throw updateError;
 
-      // 4. Thành công -> Đợi 2s rồi cho ẩn cái bảng Đòi Tiền đi
       setStatus("success");
-      setMessage(`Kích hoạt gói ${data.duration_days} ngày thành công! Hệ thống đang tải lại...`);
-      
+      setMessage("Khu vực Quản trị đã được Mở Khóa hoàn toàn!");
       setTimeout(() => {
         setHasLicense(true);
-      }, 2000);
-      
-    } catch (err) {
-      console.error(err);
+      }, 1500);
+
+    } catch (error) {
       setStatus("error");
-      setMessage("Lỗi kết nối hệ thống máy chủ.");
+      setMessage("Bảo mật chặn. Hãy báo Giám Đốc Cấp Cao.");
     }
   };
 
   if (loadingAuth) {
-    return <div className="h-screen w-full bg-slate-50 flex items-center justify-center font-bold text-coto-blue">Đang kiểm tra An ninh Khu vực...</div>;
+    return <div className="h-screen flex items-center justify-center bg-slate-50 text-coto-blue font-bold">Đang tải Lõi Hệ Thống...</div>;
   }
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden text-slate-900">
+    <div className="h-screen bg-[#f3f4f6] flex flex-col font-sans overflow-hidden">
       
-      {/* SIDEBAR DÀNH CHO DESKTOP */}
-      <aside className="hidden md:flex flex-col w-64 bg-coto-dark text-white p-4 shadow-xl z-20">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-10 h-10 bg-coto-blue rounded-lg flex items-center justify-center font-bold text-xl">
-            CT
-          </div>
-          <h1 className="font-bold text-lg leading-tight uppercase tracking-wide">
-            CoTo<br /><span className="text-coto-blue font-light">SmartDesk</span>
-          </h1>
-        </div>
-
-        <nav className="flex-1 space-y-2">
-          <a href="#" className="flex items-center gap-3 bg-white/10 px-4 py-3 rounded-md text-white font-medium hover:bg-white/20 transition">
-            <LayoutDashboard size={20} /> Tổng Quan
-          </a>
-          <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
-            <CalendarDays size={20} /> Lưới Đặt Phòng
-          </button>
-          <button onClick={() => setIsSettingsOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
-            <BedDouble size={20} /> Quản Lý Buồng
-          </button>
-          <button onClick={() => setIsHistoryOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
-            <ShieldCheck size={20} /> Nhật Ký Hoạt Động
-          </button>
-        </nav>
-        
-        <div className="pt-4 border-t border-slate-700">
-          <button onClick={() => setIsSettingsOpen(true)} className="w-full flex items-center gap-3 px-4 py-3 rounded-md text-slate-400 font-medium hover:bg-white/10 hover:text-white transition">
-            <Settings size={20} /> Cài Đặt
-          </button>
-        </div>
-      </aside>
-
-      {/* KHU VỰC NỘI DUNG CHÍNH (MAIN CONTENT) */}
-      <main className="flex-1 flex flex-col h-full overflow-y-auto pb-20 md:pb-0 relative">
-        
-        {/* NẾU KHÁCH CHƯA MUA KEY THÌ PHỦ 1 LỚP BLUR TRÊN NỘI DUNG DASHBOARD */}
-        {!hasLicense && (
-          <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-30 pointer-events-none"></div>
-        )}
-
-        <header className="bg-white border-b border-slate-200 p-4 md:px-8 flex justify-between items-center shadow-sm z-10 sticky top-0 relative">
-            <div className="md:hidden flex items-center gap-2">
-              <div className="w-8 h-8 bg-coto-blue rounded-md flex items-center justify-center font-bold text-white">CT</div>
-              <span className="font-bold">SmartDesk</span>
-            </div>
-            
-            <div className="hidden md:flex items-center gap-4">
-               <h2 className="text-2xl font-bold">Bảng Điều Khiển</h2>
-               {hasLicense && (
-                 <span className="flex items-center gap-1.5 text-xs font-bold bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full uppercase border border-emerald-200">
-                    <ShieldCheck size={14}/> Tài Khoản VIP
-                 </span>
-               )}
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-coto-blue text-white flex items-center justify-center font-bold border-2 border-white shadow-sm uppercase">
-                 {user?.user_metadata?.full_name ? user.user_metadata.full_name.charAt(0) : "KS"}
+      {/* KHÓA MÀN HÌNH NẾU CHƯA CÓ LICENSE */}
+      {!hasLicense && (
+        <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex justify-center items-center p-4">
+           <div className="bg-white rounded-2xl p-8 w-full max-w-lg shadow-2xl relative">
+              <div className="inline-flex items-center gap-2 bg-rose-500/20 px-3 py-1 rounded text-xs font-bold text-rose-500 mb-4 border border-rose-500/30 uppercase">
+                 <Key size={14} /> Hệ thống bị đóng băng
               </div>
-              <span className="font-medium hidden sm:block">
-                 {user?.user_metadata?.full_name || "Lễ Tân Tối Cao"}
-              </span>
-            </div>
-        </header>
-
-        <div className="p-4 md:p-8 space-y-6 relative">
-           <DashboardMetrics />
-
-           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-             <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 p-6 min-h-[400px]">
-                <div className="flex justify-between items-center mb-4">
-                   <h3 className="text-lg font-bold">Sơ đồ Lưu trú 7 ngày tới</h3>
-                   <button onClick={() => setIsBookingOpen(true)} className="hidden md:block bg-coto-blue text-white px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:bg-coto-blue/90">
-                      + Đặt phòng mới
-                   </button>
+              <h3 className="text-2xl font-bold mb-2">Yêu cầu Mã Kích Hoạt</h3>
+              <p className="text-slate-500 text-sm mb-6">
+                Bạn cần phải có mã VIP KEY từ Đại Lý / Admin cung cấp để truy cập vào phân hệ Quản lý.
+              </p>
+              
+              <div className="flex bg-slate-50 rounded-lg border border-slate-200 p-1 focus-within:border-blue-500 transition">
+                 <input 
+                   type="text" 
+                   value={licenseKey}
+                   onChange={(e) => setLicenseKey(e.target.value)}
+                   placeholder="Nhập mã KEY..."
+                   className="flex-1 bg-transparent px-4 py-2 outline-none font-medium text-slate-800"
+                 />
+                 <button 
+                   onClick={handleActivate}
+                   disabled={status === "loading" || !licenseKey}
+                   className="bg-blue-600 text-white px-6 py-2 rounded-md font-bold shadow-sm hover:bg-blue-700 disabled:opacity-50 transition"
+                 >
+                   {status === "loading" ? "Đang xử lý..." : "Mở Khóa"}
+                 </button>
+              </div>
+              
+              {status === "error" && (
+                <div className="mt-3 flex items-center gap-2 text-rose-500 text-sm font-medium">
+                  <AlertCircle size={16} /> {message}
                 </div>
-                
-                <div className="hidden md:block">
-                   <TapeChart key={refreshKey} />
+              )}
+              {status === "success" && (
+                <div className="mt-3 flex items-center gap-2 text-emerald-500 text-sm font-bold">
+                  <CheckCircle2 size={16} /> {message}
                 </div>
-                
-                <MobileRoomList />
-             </div>
-             
-             {/* Component Bán dịch vụ bổ trợ bên phải */}
-             <div className="xl:col-span-1 hidden xl:block">
-                <PosMenu key={refreshKey} />
-             </div>
+              )}
            </div>
-
-           {/* LICENSE KEY WIDGET ỊCH ĐÈ LÊN MÀN HÌNH NẾU CHƯA MUA KEY */}
-           {!hasLicense && (
-             <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 mt-12 bg-coto-dark text-white rounded-2xl p-8 w-[95%] max-w-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-slate-700 z-40">
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-coto-blue/20 rounded-full blur-3xl pointer-events-none"></div>
-                
-                <div className="relative z-10 flex flex-col md:flex-row gap-8 items-center">
-                   <div className="flex-1 text-center md:text-left">
-                      <div className="inline-flex items-center gap-2 bg-rose-500/20 px-3 py-1 rounded-full text-xs font-bold text-rose-400 mb-4 border border-rose-500/30">
-                         <Key size={14} /> KHÓA CHỨC NĂNG VẬN HÀNH
-                      </div>
-                      <h3 className="text-2xl font-bold mb-2">Hết Hạn Trải Nghiệm</h3>
-                      <p className="text-slate-400 text-sm">
-                        Cơ sở dữ liệu của bạn đã bị Đóng Băng Tạm Thời. Vui lòng nhập mã Bản Quyền do Giám Đốc cấp để mở lại quyền lực sử dụng hệ thống.
-                      </p>
-                   </div>
-                   
-                   <div className="w-full md:w-auto min-w-[300px]">
-                      <div className="flex bg-white/5 rounded-lg border border-white/10 p-1 focus-within:border-coto-blue transition">
-                         <input 
-                           type="text" 
-                           value={licenseKey}
-                           onChange={(e) => setLicenseKey(e.target.value)}
-                           placeholder="Mã VIP của Sếp..."
-                           className="flex-1 bg-transparent px-4 py-2 text-white outline-none placeholder:text-slate-500 text-sm"
-                         />
-                         <button 
-                           onClick={handleActivate}
-                           disabled={status === "loading" || !licenseKey}
-                           className="bg-coto-blue text-white px-4 py-2 rounded-md text-sm font-bold shadow-sm hover:bg-coto-blue/90 disabled:opacity-50 transition min-w-[100px]"
-                         >
-                           {status === "loading" ? "Xử lý..." : "Kích hoạt"}
-                         </button>
-                      </div>
-                      
-                      {status === "error" && (
-                        <div className="mt-3 flex items-center gap-2 text-rose-400 text-sm">
-                          <AlertCircle size={16} /> {message}
-                        </div>
-                      )}
-                      {status === "success" && (
-                        <div className="mt-3 flex items-center gap-2 text-emerald-400 text-sm">
-                          <CheckCircle2 size={16} /> {message}
-                        </div>
-                      )}
-                   </div>
-                </div>
-             </div>
-           )}
-
         </div>
-      </main>
+      )}
 
-      {/* CÁC POPUP MỞ RỘNG CỦA HỆ THỐNG */}
-      <BookingModal 
-        isOpen={isBookingOpen} 
-        onClose={() => setIsBookingOpen(false)} 
-        onSuccess={triggerReload}
-      />
-      
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-        onSuccess={triggerReload}
-      />
-      
-      <HistoryModal 
-        isOpen={isHistoryOpen} 
-        onClose={() => setIsHistoryOpen(false)} 
-      />
+      {/* KIOTVIET-STYLE TOP NAVIGATION */}
+      <nav className="bg-[#0070f4] text-white flex items-center justify-between px-4 h-[50px] shrink-0 sticky top-0 z-40">
+         <div className="flex items-center h-full gap-2">
+            
+            {/* Logo / Menu Toggler */}
+            <div className="flex items-center justify-center w-10 h-full hover:bg-black/10 cursor-pointer mr-2">
+               <Menu size={20} />
+            </div>
 
-      {/* BOTTOM TAB NAV MẶC ĐỊNH BỊ BLUR NẾU KHÓA KEY */}
-      <nav className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-3 z-50 pb-safe ${!hasLicense ? 'opacity-50 pointer-events-none' : ''}`}>
-        <a href="#" className="flex flex-col items-center text-coto-blue">
-          <LayoutDashboard size={24} />
-          <span className="text-[10px] font-medium mt-1">Tổng quan</span>
-        </a>
-        <a href="#" className="flex flex-col items-center text-slate-400">
-          <CalendarDays size={24} />
-          <span className="text-[10px] font-medium mt-1">Sơ đồ</span>
-        </a>
-        <a href="#" className="flex flex-col items-center text-slate-400">
-          <BedDouble size={24} />
-          <span className="text-[10px] font-medium mt-1">Buồng</span>
-        </a>
-        <a href="#" className="flex flex-col items-center text-slate-400">
-          <Settings size={24} />
-          <span className="text-[10px] font-medium mt-1">Cài đặt</span>
-        </a>
+            {/* Menu Items */}
+            <div className="flex items-center h-full text-[13px] font-semibold">
+               <button 
+                 onClick={() => setActiveTab('overview')} 
+                 className={`h-full px-4 border-b-2 transition flex items-center gap-1 ${activeTab === 'overview' ? 'border-white bg-black/5' : 'border-transparent hover:bg-black/10'}`}
+               >
+                 Tổng quan
+               </button>
+               
+               <div className="relative group h-full">
+                 <button 
+                   onClick={() => setActiveTab('rooms')} 
+                   className={`h-full px-4 border-b-2 transition flex items-center gap-1 ${activeTab === 'rooms' ? 'border-white bg-black/5' : 'border-transparent hover:bg-black/10'}`}
+                 >
+                   Phòng <ChevronDown size={14}/>
+                 </button>
+                 {/* CSS Hover Dropdown (nếu cần mỡ rộng sau) */}
+               </div>
+
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Hàng hóa</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Giao dịch</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Đối tác</button>
+               <button className="h-full px-4 border-b-2 border-transparent hover:bg-black/10 transition">Báo cáo</button>
+            </div>
+         </div>
+
+         {/* Right Side Nav */}
+         <div className="flex items-center gap-3">
+            <span className="text-[13px] font-medium hidden sm:block">
+              {user?.user_metadata?.full_name || "Admin"}
+            </span>
+            <button className="bg-white text-[#0070f4] text-[13px] font-bold px-4 py-1.5 rounded flex items-center gap-2 hover:bg-blue-50 transition shadow-sm">
+               <UserSquare2 size={16}/> Lễ tân
+            </button>
+         </div>
       </nav>
 
+      {/* NỘI DUNG HIỂN THỊ (ROUTING VIEW) */}
+      <main className="flex-1 overflow-hidden bg-[#f3f4f6]">
+         {activeTab === 'overview' && <DashboardOverview />}
+         {activeTab === 'rooms' && <RoomManagement />}
+      </main>
+      
     </div>
   );
 }
