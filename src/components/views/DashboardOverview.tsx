@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { supabase } from "@/lib/supabase";
-import { TapeChart } from "@/components/TapeChart";
+import { RoomGrid } from "@/components/views/RoomGrid";
 import { PosMenu } from "@/components/PosMenu";
 import { FileText, CheckCircle, Clock, XCircle, ArrowUpRight, ArrowDownRight, DollarSign, Wallet, FileArchive } from 'lucide-react';
 import { BookingModal } from "@/components/BookingModal";
@@ -181,9 +181,9 @@ export function DashboardOverview() {
                 + Đặt phòng mới
              </button>
            </div>
-           {/* Tái sử dụng TapeChart cũ nhưng nằm lọt thỏm ở đây */}
+           {/* Sơ đồ phòng Lưới dạng KiotViet (Thay cho TapeChart cũ) */}
            <div className="w-full">
-             <TapeChart key={refreshKey} />
+             <RoomGrid key={refreshKey} />
            </div>
         </div>
         
