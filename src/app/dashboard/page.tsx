@@ -4,6 +4,7 @@ import { CalendarDays, LayoutDashboard, Settings, BedDouble, Key, AlertCircle, C
 import { TapeChart } from "@/components/TapeChart";
 import { MobileRoomList } from "@/components/MobileRoomList";
 import { PosMenu } from "@/components/PosMenu";
+import { DashboardMetrics } from "@/components/DashboardMetrics";
 import { supabase } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 
@@ -186,24 +187,7 @@ export default function Home() {
         </header>
 
         <div className="p-4 md:p-8 space-y-6 relative">
-           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                  <p className="text-sm font-medium text-slate-500 mb-1">Công suất phòng</p>
-                  <h3 className="text-3xl font-bold text-coto-blue">85%</h3>
-              </div>
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                  <p className="text-sm font-medium text-slate-500 mb-1">Cần check-in h.nay</p>
-                  <h3 className="text-3xl font-bold text-emerald-500">12</h3>
-              </div>
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                  <p className="text-sm font-medium text-slate-500 mb-1">Sắp trả phòng</p>
-                  <h3 className="text-3xl font-bold text-amber-500">5</h3>
-              </div>
-              <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100">
-                  <p className="text-sm font-medium text-slate-500 mb-1">Phòng cần dọn</p>
-                  <h3 className="text-3xl font-bold text-rose-500">3</h3>
-              </div>
-           </div>
+           <DashboardMetrics />
 
            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
              <div className="xl:col-span-2 bg-white rounded-xl shadow-sm border border-slate-100 p-6 min-h-[400px]">
