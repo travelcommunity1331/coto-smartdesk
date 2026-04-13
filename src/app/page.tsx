@@ -15,6 +15,7 @@ export default function AuthPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [facilityName, setFacilityName] = useState("");
 
@@ -43,6 +44,7 @@ export default function AuthPage() {
           options: {
             data: {
               username,
+              full_name: fullName,
               phone,
               facility_name: facilityName
             }
@@ -156,14 +158,24 @@ export default function AuthPage() {
               
               {!isLogin && (
                 <>
-                  <div className="space-y-4 md:space-y-0 md:flex md:gap-4">
-                    <div className="md:w-1/2 space-y-1">
+                  <div className="space-y-1">
                       <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Họ và Tên</label>
                       <div className="relative">
                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                             <User size={18} className="text-slate-400" />
                          </div>
-                         <input required={!isLogin} type="text" value={username} onChange={e => setUsername(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-coto-blue focus:border-transparent transition" placeholder="Nguyễn Văn A" />
+                         <input required={!isLogin} type="text" value={fullName} onChange={e => setFullName(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-coto-blue focus:border-transparent transition" placeholder="Nguyễn Văn A" />
+                      </div>
+                  </div>
+
+                  <div className="space-y-4 md:space-y-0 md:flex md:gap-4">
+                    <div className="md:w-1/2 space-y-1">
+                      <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tên Đăng Nhập</label>
+                      <div className="relative">
+                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <User size={18} className="text-slate-400" />
+                         </div>
+                         <input required={!isLogin} type="text" value={username} onChange={e => setUsername(e.target.value)} className="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-coto-blue focus:border-transparent transition" placeholder="nguyenvana" />
                       </div>
                     </div>
                     
